@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,7 +14,19 @@
     height: 100%;
   }
   body {
+    font-family: "Baloo 2", "Fredoka", "Comic Sans MS", "Trebuchet MS",
+      system-ui, sans-serif;
     font-feature-settings: "cv11", "ss01", "ss03";
+    letter-spacing: 0.012em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: "Fredoka", "Baloo 2", "Comic Sans MS", system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 0 rgba(15, 15, 20, 0.95), 0 0 14px rgba(167, 139, 250, 0.18);
   }
 }
 
@@ -25,6 +39,9 @@
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 disabled:opacity-60 disabled:cursor-not-allowed;
+    font-family: "Fredoka", "Baloo 2", "Comic Sans MS", system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 0 rgba(15, 15, 20, 0.65);
   }
   .btn-primary {
     @apply btn bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-glow hover:from-brand-400 hover:to-brand-500;
@@ -40,15 +57,49 @@
   }
   .chip {
     @apply inline-flex items-center gap-1 rounded-full border border-ink-600 bg-ink-800/70 px-2.5 py-0.5 text-xs font-medium text-slate-300;
+    font-family: "Fredoka", "Baloo 2", "Comic Sans MS", system-ui, sans-serif;
+    letter-spacing: 0.02em;
   }
   .hairline {
     @apply border-ink-700/70;
   }
   .xp-bar {
-    @apply h-2 w-full overflow-hidden rounded-full bg-ink-700;
+    @apply relative h-2 w-full overflow-hidden rounded-full bg-ink-700/80 ring-1 ring-ink-700;
   }
   .xp-bar > span {
-    @apply block h-full rounded-full bg-gradient-to-r from-brand-400 via-brand-500 to-accent-cyan;
+    @apply relative block h-full rounded-full bg-gradient-to-r from-brand-400 via-brand-500 to-accent-cyan;
+    transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  /* Shimmer that endlessly travels across the filled portion. */
+  .xp-bar > span::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.45) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: xp-shine 2.4s linear infinite;
+    mix-blend-mode: overlay;
+  }
+  /* Glowing cap on the leading edge of the bar so it looks alive. */
+  .xp-bar > span::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #e9d5ff;
+    transform: translate(50%, -50%);
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.9),
+      0 0 18px rgba(34, 211, 238, 0.6);
+    animation: xp-cap 1.6s ease-in-out infinite;
   }
   .shimmer {
     background: linear-gradient(
@@ -131,6 +182,164 @@
       -1.2px 0 rgba(0, 234, 255, 0.55);
   }
 
+  /* Animated aurora backdrop for content banners (profile card etc).
+     Four drifting color blobs inside the element with overflow hidden,
+     plus a scanning beam. Keeps content legible via mix-blend-mode. */
+  .aurora-banner {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .aurora-banner::before,
+  .aurora-banner::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    border-radius: 9999px;
+    filter: blur(80px);
+    z-index: 0;
+    mix-blend-mode: screen;
+  }
+  .aurora-banner::before {
+    top: -40%;
+    left: -20%;
+    width: 70%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(167, 139, 250, 0.75),
+      rgba(167, 139, 250, 0) 70%
+    );
+    animation: aurora-a 18s ease-in-out infinite;
+  }
+  .aurora-banner::after {
+    bottom: -60%;
+    right: -20%;
+    width: 70%;
+    height: 220%;
+    background: radial-gradient(
+      circle,
+      rgba(34, 211, 238, 0.55),
+      rgba(251, 113, 133, 0.4) 40%,
+      transparent 70%
+    );
+    animation: aurora-b 24s ease-in-out infinite;
+  }
+
+  /* Horizontal scan beam overlay for banners / cards. */
+  .scan-beam {
+    position: relative;
+    overflow: hidden;
+  }
+  .scan-beam::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: scan 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Live glow dot — used next to active nav entries etc. */
+  .pulse-dot {
+    position: relative;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #a78bfa;
+    box-shadow: 0 0 8px rgba(167, 139, 250, 0.9),
+      0 0 16px rgba(167, 139, 250, 0.55);
+  }
+  .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    border: 1px solid rgba(167, 139, 250, 0.6);
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  /* Live status dot — green variant for "this data is fresh / connected" */
+  .pulse-live {
+    position: relative;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #34d399;
+    box-shadow: 0 0 6px rgba(52, 211, 153, 0.9),
+      0 0 12px rgba(52, 211, 153, 0.55);
+  }
+  .pulse-live::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    border: 1px solid rgba(52, 211, 153, 0.6);
+    animation: pulse-ring 2.2s ease-out infinite;
+  }
+
+  /* Orbiting dot. Apply to a tiny span that's already centered on the
+     parent via top:50%; left:50%. The animation composes a rotation,
+     outward translate, and counter-rotation so the dot traces a circle
+     around the parent's center without the dot itself spinning. */
+  .orbit-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    pointer-events: none;
+    animation: orbit 9s linear infinite;
+  }
+  .orbit-dot-slow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    pointer-events: none;
+    animation: orbit 14s linear infinite;
+  }
+
+  /* Card — layered hover lift + brand edge glow. */
+  .card-lift {
+    @apply transition-all duration-300;
+  }
+  .card-lift:hover {
+    transform: translateY(-3px);
+    border-color: rgba(139, 92, 246, 0.45);
+    box-shadow: 0 18px 40px -20px rgba(139, 92, 246, 0.45),
+      0 0 0 1px rgba(139, 92, 246, 0.25) inset;
+  }
+
+  /* Slow breathing glow for logos / accent marks. */
+  .glow-breathe {
+    filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.55));
+    animation: glow-breathe 4s ease-in-out infinite;
+  }
+
+  /* Staggered entrance — translate-only so the element is ALWAYS visible
+     regardless of animation state. We had a previous version that touched
+     opacity with `both` fill-mode; if the animation got interrupted (HMR,
+     fast re-render, etc) the element stayed at opacity 0 and the content
+     looked missing. Using a transform-only slide keeps the element
+     visible even if the animation never runs. */
+  .stagger > * {
+    animation: stagger-slide 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0.02s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.08s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.14s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.20s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.26s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.32s; }
+  .stagger > *:nth-child(7) { animation-delay: 0.38s; }
+  .stagger > *:nth-child(8) { animation-delay: 0.44s; }
+
   /* Noise overlay for a slightly tactile feel */
   .noise::before {
     content: "";
@@ -148,9 +357,69 @@
   100% { transform: translateX(-100%); }
 }
 
+@keyframes xp-shine {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes xp-cap {
+  0%, 100% { box-shadow: 0 0 10px rgba(167,139,250,0.9), 0 0 18px rgba(34,211,238,0.6); transform: translate(50%, -50%) scale(1); }
+  50%      { box-shadow: 0 0 16px rgba(167,139,250,1),   0 0 28px rgba(34,211,238,0.9); transform: translate(50%, -50%) scale(1.4); }
+}
+
+@keyframes scan {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes glow-breathe {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(167,139,250,0.45)); }
+  50%      { filter: drop-shadow(0 0 14px rgba(167,139,250,0.95)) drop-shadow(0 0 24px rgba(34,211,238,0.5)); }
+}
+
+@keyframes wisp-up {
+  0%   { transform: translateY(0) scale(0.8); opacity: 0; }
+  10%  { opacity: 0.9; }
+  90%  { opacity: 0.9; }
+  100% { transform: translateY(-110vh) scale(1); opacity: 0; }
+}
+
+/* Orbit keyframe — composes:
+   1. translate(-50%,-50%): center the dot box on the parent's center
+      (since top/left 50% puts the dot's TOP-LEFT at the center).
+   2. rotate(angle) translateX(R) rotate(-angle): circle the dot around
+      the parent center with radius R, counter-rotating so the dot itself
+      doesn't visibly spin. */
+@keyframes orbit {
+  0%   { transform: translate(-50%, -50%) rotate(0deg) translateX(var(--orbit-radius, 46px)) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg) translateX(var(--orbit-radius, 46px)) rotate(-360deg); }
+}
+
+/* Stagger entrance — transform-only, no opacity, so a child is always
+   visible even if the animation never actually runs. */
+@keyframes stagger-slide {
+  0%   { transform: translateY(6px); }
+  100% { transform: translateY(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tilt:hover { transform: none; }
   .btn-pulse::after { animation: none; }
   .marquee__track { animation: none; }
   .glitch, .glitch-strong { animation: none; }
+  .xp-bar > span::after,
+  .xp-bar > span::before,
+  .aurora-banner::before,
+  .aurora-banner::after,
+  .scan-beam::after,
+  .pulse-dot::after,
+  .pulse-live::after,
+  .orbit-dot,
+  .orbit-dot-slow,
+  .glow-breathe,
+  .stagger > * {
+    animation: none !important;
+    transform: none !important;
+  }
 }

@@ -63,6 +63,7 @@ export default {
         "grid-pulse": "grid-pulse 8s ease-in-out infinite",
         "spin-slow": "spin 28s linear infinite",
         "spin-slower": "spin 90s linear infinite",
+        "spin-slowest": "spin 180s linear infinite",
         "pulse-ring": "pulse-ring 3s ease-in-out infinite",
         "fade-up": "fade-up 0.6s ease-out both",
         twinkle: "twinkle 4s ease-in-out infinite",
@@ -71,6 +72,12 @@ export default {
         "star-drift-slow": "star-drift 220s linear infinite",
         shoot: "shoot 3.5s ease-in forwards",
         glitch: "glitch 2.4s infinite steps(1, end)",
+        breathe: "breathe 5s ease-in-out infinite",
+        "breathe-slow": "breathe 9s ease-in-out infinite",
+        "nebula-drift": "nebula-drift 40s ease-in-out infinite",
+        "nebula-drift-rev": "nebula-drift-rev 52s ease-in-out infinite",
+        comet: "comet 7s linear forwards",
+        "constellation-flash": "constellation-flash 5s ease-in-out infinite",
       },
       keyframes: {
         shine: {
@@ -144,6 +151,32 @@ export default {
             transform: "translate(0,0)",
             filter: "drop-shadow(2px 0 0 #ff003c) drop-shadow(-2px 0 0 #00eaff)",
           },
+        },
+        breathe: {
+          "0%,100%": { opacity: "0.55", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.25)" },
+        },
+        "nebula-drift": {
+          "0%,100%": { transform: "translate3d(0,0,0) scale(1)" },
+          "50%": { transform: "translate3d(6vw,-4vh,0) scale(1.08)" },
+        },
+        "nebula-drift-rev": {
+          "0%,100%": { transform: "translate3d(0,0,0) scale(1.05)" },
+          "50%": { transform: "translate3d(-7vw,5vh,0) scale(0.95)" },
+        },
+        comet: {
+          "0%": { transform: "translate3d(0,0,0)", opacity: "0" },
+          "10%": { opacity: "1" },
+          "90%": { opacity: "1" },
+          "100%": {
+            transform: "translate3d(110vw,55vh,0)",
+            opacity: "0",
+          },
+        },
+        "constellation-flash": {
+          "0%,85%,100%": { opacity: "0" },
+          "90%": { opacity: "0.5" },
+          "95%": { opacity: "0.15" },
         },
       },
     },

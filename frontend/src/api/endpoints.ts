@@ -23,6 +23,11 @@ export const AuthAPI = {
       body
     ),
   me: () => api.get<{ user: UserDTO }>("/api/auth/me"),
+  updateProfile: (body: {
+    username?: string;
+    displayName?: string;
+    bio?: string;
+  }) => api.patch<{ user: UserDTO }>("/api/auth/profile", body),
 };
 
 export const UsersAPI = {

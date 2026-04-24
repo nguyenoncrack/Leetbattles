@@ -210,4 +210,53 @@ router.get(
   })
 );
 
+// Partial profile update. Used by the onboarding flow after a Google
+// sign-in so users can set their own username + display name instead of
+// living with the auto-generated slug derived from their Google email.
+const updateProfileSchema = z.object({
+  username: z
+    .string()
+    .min(3)
+    .max(24)
+    .regex(/^[a-zA-Z0-9_]+$/, "letters, numbers and underscores only")
+    .optional(),
+  displayName: z.string().min(1).max(48).optional(),
+  bio: z.string().max(280).optional(),
+});
+
+router.patch(
+  "/profile",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { userId } = req as AuthedRequest;
+    const body = updateProfileSchema.parse(req.body);
+
+    const data: {
+      username?: string;
+      displayName?: string;
+      bio?: string;
+    } = {};
+    if (body.username) data.username = body.username.toLowerCase();
+    if (body.displayName) data.displayName = body.displayName.trim();
+    if (body.bio !== undefined) data.bio = body.bio;
+
+    if (data.username) {
+      // Enforce username uniqueness here for a friendly error message —
+      // the DB unique index would otherwise throw a cryptic Prisma error.
+      const clash = await prisma.user.findFirst({
+        where: { username: data.username, NOT: { id: userId } },
+      });
+      if (clash) throw Conflict("Username already taken");
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data,
+      include: USER_INCLUDE,
+    });
+
+    res.json({ user: publicUser(updated, { includeEmail: true }) });
+  })
+);
+
 export default router;

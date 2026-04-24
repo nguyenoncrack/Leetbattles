@@ -7,6 +7,8 @@ import {
   LeaderboardAPI,
   LeetcodeAPI,
 } from "../api/endpoints";
+import { AmbientXpWisps } from "../components/AmbientXpWisps";
+import { AnimatedNumber } from "../components/AnimatedNumber";
 import { Avatar } from "../components/Avatar";
 import { BadgePill } from "../components/Badge";
 import { EmptyState } from "../components/EmptyState";
@@ -93,7 +95,10 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6">
+      {/* Ambient drifting XP wisps — runs idle in the background. */}
+      <AmbientXpWisps max={3} />
+
       <ProfileCard />
 
       {!user.leetcode ? (
@@ -108,49 +113,72 @@ export function DashboardPage() {
           }
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="stagger grid gap-4 md:grid-cols-4">
           <StatCard
             label="Total solved"
-            value={fmt(user.leetcode.totalSolved)}
+            value={user.leetcode.totalSolved}
             tone="text-white"
+            accent="from-brand-500/30 to-accent-cyan/20"
           />
           <StatCard
             label="Easy"
-            value={fmt(user.leetcode.easySolved)}
+            value={user.leetcode.easySolved}
             tone="text-accent-green"
+            accent="from-emerald-500/25 to-teal-500/10"
           />
           <StatCard
             label="Medium"
-            value={fmt(user.leetcode.mediumSolved)}
+            value={user.leetcode.mediumSolved}
             tone="text-accent-amber"
+            accent="from-amber-500/25 to-orange-500/10"
           />
           <StatCard
             label="Hard"
-            value={fmt(user.leetcode.hardSolved)}
+            value={user.leetcode.hardSolved}
             tone="text-accent-rose"
+            accent="from-rose-500/25 to-fuchsia-500/10"
           />
         </div>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-sm text-slate-400">
+        <div className="flex items-center gap-2 text-sm text-slate-400">
           {user.leetcode ? (
             <>
-              LeetCode:{" "}
-              <span className="font-mono text-slate-200">
-                @{user.leetcode.username}
+              <span className="pulse-live" aria-hidden />
+              <span>
+                LeetCode:{" "}
+                <span className="font-mono text-slate-200">
+                  @{user.leetcode.username}
+                </span>
+                {user.leetcode.lastSyncedAt && (
+                  <> · synced {timeAgo(user.leetcode.lastSyncedAt)}</>
+                )}
               </span>
-              {user.leetcode.lastSyncedAt && (
-                <> · synced {timeAgo(user.leetcode.lastSyncedAt)}</>
-              )}
             </>
           ) : (
-            "No LeetCode profile connected yet"
+            <>
+              <span className="pulse-dot" aria-hidden />
+              <span>No LeetCode profile connected yet</span>
+            </>
           )}
         </div>
         {user.leetcode && (
-          <button onClick={sync} className="btn-primary" disabled={syncing}>
-            {syncing ? <Spinner /> : "↻ Sync now"}
+          <button
+            onClick={sync}
+            className="btn-primary btn-pulse group"
+            disabled={syncing}
+          >
+            {syncing ? (
+              <Spinner />
+            ) : (
+              <>
+                <span className="inline-block transition-transform duration-500 group-hover:rotate-180">
+                  ↻
+                </span>
+                Sync now
+              </>
+            )}
           </button>
         )}
       </div>
@@ -174,21 +202,66 @@ function ProfileCard() {
   if (!user) return null;
 
   return (
-    <div className="card overflow-hidden animate-fade-up">
-      <div className="relative h-32 overflow-hidden bg-gradient-to-br from-brand-700/70 via-brand/30 to-accent-cyan/30">
-        <div className="pointer-events-none absolute -top-16 -left-16 h-56 w-56 rounded-full bg-brand/30 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-10 right-0 h-48 w-48 rounded-full bg-accent-cyan/20 blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-grid-lines bg-grid-40 opacity-25 [mask-image:radial-gradient(ellipse_at_center,_black,_transparent_75%)]" />
+    <div className="card card-lift overflow-hidden animate-fade-up">
+      <div className="aurora-banner scan-beam relative h-36 bg-gradient-to-br from-brand-700/60 via-brand/25 to-accent-cyan/25">
+        <div className="pointer-events-none absolute inset-0 bg-grid-lines bg-grid-40 opacity-20 [mask-image:radial-gradient(ellipse_at_center,_black,_transparent_75%)]" />
+        {/* tiny sprinkled stars over the banner */}
+        <div className="pointer-events-none absolute inset-0">
+          <span className="absolute left-[8%] top-[22%] h-1 w-1 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.9)] animate-twinkle" />
+          <span
+            className="absolute left-[38%] top-[68%] h-[3px] w-[3px] rounded-full bg-brand-300 shadow-[0_0_10px_rgba(167,139,250,0.9)] animate-twinkle-slow"
+            style={{ animationDelay: "1.2s" }}
+          />
+          <span
+            className="absolute left-[72%] top-[20%] h-[2px] w-[2px] rounded-full bg-accent-cyan shadow-[0_0_8px_rgba(34,211,238,0.9)] animate-twinkle"
+            style={{ animationDelay: "0.6s" }}
+          />
+          <span
+            className="absolute left-[88%] top-[75%] h-1 w-1 rounded-full bg-white/90 animate-twinkle-slow"
+            style={{ animationDelay: "2.2s" }}
+          />
+          <span
+            className="absolute left-[55%] top-[35%] h-[2px] w-[2px] rounded-full bg-accent-rose/80 animate-twinkle"
+            style={{ animationDelay: "1.8s" }}
+          />
+        </div>
       </div>
       <div className="flex flex-wrap items-start justify-between gap-4 px-6 pb-5 pt-0">
         <div className="flex items-end gap-4">
-          <div className="-mt-12">
-            <Avatar
-              url={user.avatarUrl}
-              name={user.displayName}
-              size={92}
-              className="ring-4 ring-ink-900"
-            />
+          <div className="-mt-12 relative">
+            {/* Avatar sits in normal flow so the layout computes its size
+                correctly; decorative halo + orbit dots are absolutely
+                positioned on top of it. Keeping Avatar as the flow anchor
+                avoids the inline-flex baseline gap we hit earlier. */}
+            <div className="relative inline-block">
+              <Avatar
+                url={user.avatarUrl}
+                name={user.displayName}
+                size={92}
+                className="relative z-10 ring-4 ring-ink-900"
+              />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -inset-3 -z-[1] rounded-full bg-gradient-to-br from-brand/40 via-brand-400/25 to-accent-cyan/25 blur-xl opacity-60 animate-breathe-slow"
+              />
+              <span
+                aria-hidden
+                className="orbit-dot z-20 block h-2 w-2 rounded-full bg-brand-300 shadow-[0_0_10px_rgba(167,139,250,0.95)]"
+                style={
+                  { "--orbit-radius": "58px" } as React.CSSProperties
+                }
+              />
+              <span
+                aria-hidden
+                className="orbit-dot-slow z-20 block h-1.5 w-1.5 rounded-full bg-accent-cyan shadow-[0_0_8px_rgba(34,211,238,0.9)]"
+                style={
+                  {
+                    "--orbit-radius": "52px",
+                    animationDelay: "-4s",
+                  } as React.CSSProperties
+                }
+              />
+            </div>
           </div>
           <div className="pb-1">
             <div className="text-xs text-slate-400">@{user.username}</div>
@@ -249,17 +322,28 @@ function StatCard({
   label,
   value,
   tone,
+  accent,
 }: {
   label: string;
-  value: string;
+  value: number;
   tone: string;
+  accent: string;
 }) {
   return (
-    <div className="card p-4">
-      <div className="text-xs font-medium uppercase tracking-wider text-slate-400">
+    <div className="card card-lift group relative overflow-hidden p-4">
+      {/* Colored accent wash, swells on hover */}
+      <div
+        className={`pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-gradient-to-br ${accent} blur-2xl opacity-60 transition-opacity duration-500 group-hover:opacity-100 animate-breathe-slow`}
+      />
+      {/* Traveling shine */}
+      <div className="pointer-events-none absolute inset-0 scan-beam" />
+      <div className="relative text-xs font-medium uppercase tracking-wider text-slate-400">
         {label}
       </div>
-      <div className={`mt-1 text-2xl font-bold ${tone}`}>{value}</div>
+      <AnimatedNumber
+        value={value}
+        className={`relative mt-1 block text-2xl font-bold tabular-nums ${tone}`}
+      />
     </div>
   );
 }
@@ -272,9 +356,12 @@ function ChallengeList({
   loading: boolean;
 }) {
   return (
-    <section className="card p-5">
+    <section className="card card-lift p-5 animate-fade-up">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-white">Weekly challenges</h2>
+        <h2 className="flex items-center gap-2 font-bold text-white">
+          <span className="pulse-dot" aria-hidden />
+          Weekly challenges
+        </h2>
         <Link
           to="/app/challenges"
           className="text-xs text-brand-400 hover:text-brand-300"
@@ -292,11 +379,11 @@ function ChallengeList({
           icon={<IconTarget size={30} className="text-brand-300" />}
         />
       ) : (
-        <ul className="mt-4 space-y-3">
+        <ul className="stagger mt-4 space-y-3">
           {challenges.map((c) => (
             <li
               key={c.id}
-              className="rounded-xl border border-ink-700 bg-ink-800/60 p-3"
+              className="rounded-xl border border-ink-700/70 bg-ink-800/50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40 hover:bg-ink-800/80 hover:shadow-[0_8px_24px_-12px_rgba(139,92,246,0.5)]"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -339,9 +426,12 @@ function FriendsMini({
   loading: boolean;
 }) {
   return (
-    <section className="card p-5">
+    <section className="card card-lift p-5 animate-fade-up" style={{ animationDelay: "0.1s" }}>
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-white">Friends</h2>
+        <h2 className="flex items-center gap-2 font-bold text-white">
+          <span className="pulse-live" aria-hidden />
+          Friends
+        </h2>
         <Link
           to="/app/leaderboard?board=friends"
           className="text-xs text-brand-400 hover:text-brand-300"
@@ -364,11 +454,11 @@ function FriendsMini({
           }
         />
       ) : (
-        <ul className="mt-4 space-y-2">
+        <ul className="stagger mt-4 space-y-2">
           {rows.slice(0, 6).map((r) => (
             <li
               key={r.id}
-              className="flex items-center gap-3 rounded-xl border border-ink-700 bg-ink-800/60 p-2"
+              className="flex items-center gap-3 rounded-xl border border-ink-700/70 bg-ink-800/50 p-2 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40 hover:bg-ink-800/80"
             >
               <RankIcon rank={r.rank} />
               <Avatar url={r.avatarUrl} name={r.displayName} size={32} />
@@ -401,9 +491,12 @@ function ActivityList({
   loading: boolean;
 }) {
   return (
-    <section className="card p-5">
+    <section className="card card-lift p-5 animate-fade-up" style={{ animationDelay: "0.15s" }}>
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-white">Recent activity</h2>
+        <h2 className="flex items-center gap-2 font-bold text-white">
+          <span className="pulse-live" aria-hidden />
+          Recent activity
+        </h2>
         <Link
           to="/app/activity"
           className="text-xs text-brand-400 hover:text-brand-300"
@@ -421,11 +514,11 @@ function ActivityList({
           icon={<IconPulse size={30} className="text-brand-300" />}
         />
       ) : (
-        <ul className="mt-4 space-y-2">
+        <ul className="stagger mt-4 space-y-2">
           {events.map((ev) => (
             <li
               key={ev.id}
-              className="flex items-center gap-3 rounded-xl border border-ink-700 bg-ink-800/50 p-2"
+              className="flex items-center gap-3 rounded-xl border border-ink-700/70 bg-ink-800/40 p-2 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40 hover:bg-ink-800/80"
             >
               <Avatar url={ev.user.avatarUrl} name={ev.user.displayName} size={32} />
               <div className="min-w-0 flex-1">
@@ -456,7 +549,7 @@ function BadgesCard() {
   const { user } = useAuth();
   if (!user) return null;
   return (
-    <section className="card p-5">
+    <section className="card card-lift p-5 animate-fade-up" style={{ animationDelay: "0.2s" }}>
       <h2 className="font-bold text-white">Your badges</h2>
       {user.badges.length === 0 ? (
         <EmptyState

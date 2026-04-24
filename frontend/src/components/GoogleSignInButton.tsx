@@ -18,7 +18,10 @@ export function GoogleSignInButton({ redirectTo = "/app" }: { redirectTo?: strin
     setBusy(true);
     try {
       const { created } = await loginWithGoogle();
-      navigate(created ? "/app/connect" : redirectTo);
+      // First-time Google sign-ups hit the onboarding page first so they
+      // can claim their own username + display name instead of living with
+      // the auto-generated slug derived from their Google email.
+      navigate(created ? "/onboarding" : redirectTo);
     } catch (err) {
       const msg =
         err instanceof ApiError
