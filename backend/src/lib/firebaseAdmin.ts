@@ -8,10 +8,14 @@ let disabled = false;
 function init() {
   if (initialized || disabled) return;
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  const projectId =
+    process.env.FIREBASE_PROJECT_ID ?? process.env.APP_FIREBASE_PROJECT_ID;
+  const saJson =
+    process.env.FIREBASE_SERVICE_ACCOUNT_JSON ??
+    process.env.APP_FIREBASE_SERVICE_ACCOUNT_JSON;
   const saPath =
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH ??
+    process.env.APP_FIREBASE_SERVICE_ACCOUNT_KEY_PATH ??
     process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
   try {

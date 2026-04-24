@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  username          String   @unique
+  displayName       String
+  passwordHash      String?
+  avatarUrl         String?
+  bio               String?
+  xp                Int      @default(0)
+  level             Int      @default(1)
+  currentStreak     Int      @default(0)
+  longestStreak     Int      @default(0)
+  lastActivityAt    DateTime?
+  weeklyXp          Int      @default(0)
+  weeklySolved      Int      @default(0)
+  weekResetAt       DateTime?
+  rivalId           String?
+  rival             User?    @relation("UserRival", fields: [rivalId], references: [id], onDelete: SetNull)
+  rivalOf           User[]   @relation("UserRival")
+  leetcodeProfile   LeetCodeProfile?
+  sentRequests      Friendship[]           @relation("FriendshipRequester")
+  receivedRequests  Friendship[]           @relation("FriendshipAddressee")
+  badges            UserBadge[]
+  challengeProgress UserChallengeProgress[]
+  activity          ActivityEvent[]        @relation("ActivityActor")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([xp])
+  @@index([weeklyXp])
+}
+
+model LeetCodeProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leetcodeUsername  String   @unique
+  ranking           Int?
+  totalSolved       Int      @default(0)
+  easySolved        Int      @default(0)
+  mediumSolved      Int      @default(0)
+  hardSolved        Int      @default(0)
+  acceptanceRate    Float?
+  recentSubmissions Json?
+  lastSyncedAt      DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(PENDING)
+  requester   User             @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee   User             @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@index([requesterId, status])
+}
+
+model Badge {
+  id          String     @id @default(cuid())
+  key         String     @unique
+  name        String
+  description String
+  icon        String
+  tier        String     @default("bronze")
+  users       UserBadge[]
+  createdAt   DateTime   @default(now())
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+}
+
+enum ChallengeKind {
+  SOLVE_EASY
+  SOLVE_MEDIUM
+  SOLVE_HARD
+  SOLVE_TOTAL
+}
+
+model WeeklyChallenge {
+  id          String        @id @default(cuid())
+  weekStart   DateTime
+  title       String
+  description String
+  kind        ChallengeKind
+  target      Int
+  xpReward    Int
+  progress    UserChallengeProgress[]
+  createdAt   DateTime      @default(now())
+
+  @@unique([weekStart, kind, target])
+  @@index([weekStart])
+}
+
+model UserChallengeProgress {
+  id          String          @id @default(cuid())
+  userId      String
+  challengeId String
+  progress    Int             @default(0)
+  completed   Boolean         @default(false)
+  completedAt DateTime?
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge   WeeklyChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([userId, challengeId])
+  @@index([userId])
+}
+
+enum ActivityType {
+  SOLVED_PROBLEMS
+  LEVELED_UP
+  BADGE_EARNED
+  CHALLENGE_COMPLETED
+  STREAK_MILESTONE
+  PASSED_RIVAL
+  FRIEND_ADDED
+  JOINED
+}
+
+model ActivityEvent {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation("ActivityActor", fields: [userId], references: [id], onDelete: Cascade)
+  type      ActivityType
+  message   String
+  metadata  Json?
+  createdAt DateTime     @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}

@@ -13,7 +13,7 @@ export const env = {
   PORT: parseInt(process.env.PORT ?? "4000", 10),
   JWT_SECRET: required("JWT_SECRET", "dev-insecure-secret-change-me"),
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? "7d",
-  CORS_ORIGIN: (process.env.CORS_ORIGIN ?? "http://localhost:5173")
+  CORS_ORIGIN: (process.env.CORS_ORIGIN ?? "*")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),
