@@ -81,7 +81,7 @@ function StrokeIcon({
   className,
   strokeWidth = 1.8,
   ...rest
-}: IconProps & { children: React.ReactNode; strokeWidth?: number }) {
+}: IconProps & { children: React.ReactNode; strokeWidth?: number | string }) {
   return (
     <svg
       width={size}
